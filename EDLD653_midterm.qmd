@@ -143,21 +143,18 @@ Note, on my computer these took about 1 minute per analysis. It will likely take
 
 # using group_by() \|\> nest() and map()
 ```{r}
-effect_sizes_nested <- summary_stats %>% 
-  group_by(district, academic_year) %>% 
+effect_sizes_nested_option1 <- summary_stats %>% #new df
+  group_by(district, academic_year) %>% # every school district in the state for each academic year
   nest() %>% 
-  mutate(
-    effect_size = map(
-      data,
-      ~ estimate_v(.x, "white", "hispanic_latino")
-    )
-  ) %>% 
-  unnest(effect_size)
+  mutate(effect_size = map(data, ~ estimate_v(.x, "white", "hispanic_latino"))) 
 ```
 
 # using nest_by() \|\> summarize().
 ```{r}
-idk
+effect_sizes_nested_option2 <- summary_stats %>% #new df
+  ungroup() %>% 
+  nest_by(district, academic_year) %>% # every school district in the state for each academic year
+  summarize(effect_size = list(estimate_v(data, "white", "hispanic_latino"))) 
 ```
 
 ## B2. (10 Points)
