@@ -12,6 +12,9 @@ cache: true
 ```{r}
 library(glue)
 library(rio)
+library(tidyverse)
+library(purrr)
+library(janitor)
 ```
 
 # Midterm Test
@@ -54,7 +57,8 @@ download_file <- function(year) {
 Use the function above to download all of the data from the 2014-15 to 2017-18 school years and bind it into a single data frame, using a single function (i.e., one line of code). Note, this may take a minute or two to run, depending on your Internet speed.
 
 ```{r}
-
+all_data <- map_dfr(15:18, download_file) %>% #download and make df at same time
+  clean_names #clean names obvi
 ```
 
 Conduct some basic data cleaning to make your data file look like the following.
@@ -63,10 +67,13 @@ Conduct some basic data cleaning to make your data file look like the following.
 
 -   Select variables related to the number of students in each of the levels (1 through 4), and not percentages or combined levels.
 
--   Remove any row that has missing data in any of the n variables
+-   Remove any row that has missing data in any of the n variables 
+# ??????
 
 ```{r}
-
+filtered_data <- all_data %>% 
+  filter(student_group %in% c("White", "Hispanic/Latino")) %>% #Filter for only student groups coded as "White" or "Hispanic/Latino".
+  filter(grade_level %in% c("Grade 1", "Grade 2", "Grade 3", "Grade 4")) #Select variables related to the number of students in each of the levels (1 through 4), and not percentages or combined levels.
 ```
 
 ## A2. (10 Points)
