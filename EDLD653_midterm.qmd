@@ -145,6 +145,10 @@ Note, on my computer these took about 1 minute per analysis. It will likely take
 
 Reproduce the following plot to confirm that the estimates are equivalent across methods.
 
+```{r}
+
+```
+
 ## B3. (15 points)
 
 The plot below shows the achievement difference estimates for one school district across years. Produce a similar plot to the below for each of the first 100 school districts. Once you’ve created all the plots, reproduce them again using an alternative method. Make sure you don’t miss the caption noting the number of schools in the district.
