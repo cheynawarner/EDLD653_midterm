@@ -63,25 +63,43 @@ all_data <- map_dfr(15:18, download_file) %>% #download and make df at same time
 
 Conduct some basic data cleaning to make your data file look like the following.
 
--   Filter for only student groups coded as "White" or "Hispanic/Latino".
+- Filter for only student groups coded as "White" or "Hispanic/Latino".
 
--   Select variables related to the number of students in each of the levels (1 through 4), and not percentages or combined levels.
+- Select variables related to the number of students in each of the levels (1 through 4), and not percentages or combined levels.
 
--   Remove any row that has missing data in any of the n variables 
-# ??????
+- Remove any row that has missing data in any of the n variables
 
 ```{r}
 filtered_data <- all_data %>% 
   filter(student_group %in% c("White", "Hispanic/Latino")) %>% #Filter for only student groups coded as "White" or "Hispanic/Latino".
-  filter(grade_level %in% c("Grade 1", "Grade 2", "Grade 3", "Grade 4")) #Select variables related to the number of students in each of the levels (1 through 4), and not percentages or combined levels.
+  select(-percent_level_1, -percent_level_2, -percent_level_3, -percent_level_4, -percent_proficient_level_3_or_4, -number_proficient_level_3_or_4, -number_proficient, -number_of_participants) 
+
+filtered_data <- filtered_data %>% 
+  pivot_longer(cols = starts_with("number"),
+               names_to = "level",
+               values_to = "n",
+               names_prefix = ("number_")) %>% 
+               drop_na()
 ```
 
 ## A2. (10 Points)
 
-Sum the n across grades and school for each district within each academic year, student group, and level. Calculate the number of schools (unique schools listed) for each district. Also move your data to a wider format where the student groups become new columns, filled by the district n. Remove districts that did not report numbers for one or both student groups (i.e., drop missing data from the new columns). Your data frame should look like the below
+- Sum the n across grades and school for each district within each academic year, student group, and level.
+
+- Calculate the number of schools (unique schools listed) for each district.
+
+- Also move your data to a wider format where the student groups become new columns, filled by the district n.
+
+- Remove districts that did not report numbers for one or both student groups (i.e., drop missing data from the new columns).
+
+Your data frame should look like the below
 
 ```{r}
-
+summary_stats <- filtered_data %>% 
+    group_by(district, academic_year, student_group, level) %>% 
+    summarize(n_students = sum(n), n_schools = n_distinct(school)) %>% 
+    pivot_wider(names_from = student_group, 
+                values_from = n_students)
 ```
 
 # Part B: Achievement disparities (50 points)
@@ -140,7 +158,7 @@ model_list_object |>
   filter(district %in% dists)
 ```
 
-## B4. (10 points) 
+## B4. (10 points)
 
 Save the plots into a “plots” directory. Make sure the file names are meaningful.
 
