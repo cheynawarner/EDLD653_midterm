@@ -15,6 +15,7 @@ library(rio)
 library(tidyverse)
 library(purrr)
 library(janitor)
+library(glue)
 ```
 
 # Midterm Test
@@ -166,13 +167,15 @@ plot_data <- left_join(effect_sizes_nested_option1, effect_sizes_nested_option2,
 
 clean_data <- plot_data %>% 
   unnest(effect_size_1) %>% # get data out of its evil form
-  select(c(district, academic_year, data, v, effect_size_2))
+  select(c(district, academic_year, data, v, effect_size_2, v_se))
   colnames(clean_data)[colnames(clean_data) == "v"] <- "option1" #rename v so i can have v twice
+  colnames(clean_data)[colnames(clean_data) == "v_se"] <- "option1_se" #rename v so i can have v twice
 
 clean_data <- clean_data %>% 
   unnest(effect_size_2) %>% # get data out of its evil form again
-  select(c(-auc, -v_se))
+  select(c(-auc))
   colnames(clean_data)[colnames(clean_data) == "v"] <- "option2" #rename v so i can have v twice
+  colnames(clean_data)[colnames(clean_data) == "v_se"] <- "option2_se" #rename v so i can have v twice
 
 plot <- clean_data %>% 
   ggplot(aes(x = option1, y = option2))+
@@ -192,10 +195,31 @@ The plot below shows the achievement difference estimates for one school distric
 **HINT**: You need to select unique districts. You may want to try something like the following:
 
 ```{r}
-dists <- unique(v$district)[1:100]
+dists <- unique(clean_data$district)[1:100]
 
 model_list_object |> 
   filter(district %in% dists)
+```
+
+```{r}
+cleaner_data <- clean_data  %>%  #filtering my df :)
+  filter(district %in% dists)
+
+plots <- cleaner_data %>% 
+  group_by(district) %>% 
+  nest() %>% 
+  mutate(plot = map(data, ~.x %>% 
+              ggplot(aes(x = academic_year, y = option1)) +
+              geom_errorbar(aes(ymin = option1 - option1_se, ymax = option1 + option1_se))+
+              geom_point(aes(x = academic_year, y = option1))+
+              geom_line(color = "pink")+
+                  labs(title = "Achievement Gap Estimates: ",
+                       subtitle = paste("Negative values indicate White Students have higher average achievement","Positive values indicate Hispanic/Latino students have higher achievement", sep = "\n"),
+                       x = "School Year",
+                       y = "Average achievement differences (SD units)")))+
+  
+
+plots$plot[[2]]
 ```
 
 ## B4. (10 points)
