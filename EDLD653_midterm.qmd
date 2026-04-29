@@ -201,6 +201,7 @@ model_list_object |>
   filter(district %in% dists)
 ```
 
+# still need to add colors and note at bottom and change titles for each graph
 ```{r}
 cleaner_data <- clean_data  %>%  #filtering my df :)
   filter(district %in% dists)
@@ -216,8 +217,7 @@ plots <- cleaner_data %>%
                   labs(title = "Achievement Gap Estimates: ",
                        subtitle = paste("Negative values indicate White Students have higher average achievement","Positive values indicate Hispanic/Latino students have higher achievement", sep = "\n"),
                        x = "School Year",
-                       y = "Average achievement differences (SD units)")))+
-  
+                       y = "Average achievement differences (SD units)")))
 
 plots$plot[[2]]
 ```
