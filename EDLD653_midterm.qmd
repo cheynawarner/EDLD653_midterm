@@ -146,7 +146,7 @@ Note, on my computer these took about 1 minute per analysis. It will likely take
 effect_sizes_nested_option1 <- summary_stats %>% #new df
   group_by(district, academic_year) %>% # every school district in the state for each academic year
   nest() %>% 
-  mutate(effect_size = map(data, ~ estimate_v(.x, "white", "hispanic_latino"))) 
+  mutate(effect_size_1 = map(data, ~ estimate_v(.x, "white", "hispanic_latino"))) 
 ```
 
 # using nest_by() \|\> summarize().
@@ -154,7 +154,7 @@ effect_sizes_nested_option1 <- summary_stats %>% #new df
 effect_sizes_nested_option2 <- summary_stats %>% #new df
   ungroup() %>% 
   nest_by(district, academic_year) %>% # every school district in the state for each academic year
-  summarize(effect_size = list(estimate_v(data, "white", "hispanic_latino"))) 
+  summarize(effect_size_2 = list(estimate_v(data, "white", "hispanic_latino"))) 
 ```
 
 ## B2. (10 Points)
@@ -162,7 +162,27 @@ effect_sizes_nested_option2 <- summary_stats %>% #new df
 Reproduce the following plot to confirm that the estimates are equivalent across methods.
 
 ```{r}
+plot_data <- left_join(effect_sizes_nested_option1, effect_sizes_nested_option2, by = c("academic_year", "district"))
 
+clean_data <- plot_data %>% 
+  unnest(effect_size_1) %>% # get data out of its evil form
+  select(c(district, academic_year, data, v, effect_size_2))
+  colnames(clean_data)[colnames(clean_data) == "v"] <- "option1" #rename v so i can have v twice
+
+clean_data <- clean_data %>% 
+  unnest(effect_size_2) %>% # get data out of its evil form again
+  select(c(-auc, -v_se))
+  colnames(clean_data)[colnames(clean_data) == "v"] <- "option2" #rename v so i can have v twice
+
+plot <- clean_data %>% 
+  ggplot(aes(x = option1, y = option2))+
+  geom_point(color = "hotpink")+
+  geom_smooth(method = "lm", color = "pink")+
+  labs(x = "V('group_by %>% nest() %>% mutate () %>% map()')",
+       y = "V('nest_by %>% summarize()')")+
+  theme_minimal()
+       
+plot
 ```
 
 ## B3. (15 points)
