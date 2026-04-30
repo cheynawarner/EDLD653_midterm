@@ -214,9 +214,7 @@ school_data <- cleaner_data %>%
 plots <- school_data %>% 
   group_by(district) %>% 
   nest() %>% 
-  mutate(
-    n_schools = pmap(data,
-    plot = map2(list(data, district) %>% 
+  mutate(plot = pmap(list(district, academic_year, option1, option1_se, n_school) %>% 
         ggplot(aes(x = academic_year, y = option1)) +
         geom_errorbar(aes(ymin = option1 - option1_se, ymax = option1 + option1_se))+
         geom_point()+
@@ -225,14 +223,13 @@ plots <- school_data %>%
         labs(
           title = paste("Achievement Gap Estimates:", .y),
           subtitle = paste(
-            "Negative values indicate students have higher average achievement",
-            "Positive values indicate Hispanic/Latino students have higher achievement",sep = "\n"),
+            "Negative values indicate <span style='color:#d35cff'>White</span> students have higher average achievement",
+            "Positive values indicate <span style='color:#d35cff'>Hispanic/Latino</span> students have higher achievement",sep = "\n"),
           x = "School Year",
           y = "Average achievement differences (SD units)",
-          caption = glue("District includes {n_school} schools"))+
+          caption = glue("District includes {n_schools} schools"))+
   theme_minimal()
-  )))
-
+  ))
 
 plots$plot[[7]]
 ```
@@ -256,8 +253,8 @@ plots2 <- cleaner_data %>%
         labs(
           title = paste("Achievement Gap Estimates:", .y),
           subtitle = paste(
-            "Negative values indicate White students have higher average achievement",
-            "Positive values indicate Hispanic/Latino students have higher achievement",sep = "\n"),
+            "Negative values indicate <span style='color:#d35cff'>White</span> students have higher average achievement",
+            "Positive values indicate <span style='color:#d35cff'>Hispanic/Latino</span> students have higher achievement",sep = "\n"),
           x = "School Year",
           y = "Average achievement differences (SD units)",
           caption = paste("District includes (.x$n_schools) schools"))+
@@ -269,6 +266,8 @@ plots2$plot[[7]]
 ### Achievement difference estimates for one school district across years (Version 2)
 ```{r}
 plots2 <- cleaner_data %>% 
+  ungroup() %>% 
+  nest_by(SOMETHING, SOMETHING ELSE) %>% 
   mutate(n_schools = map_int(data, ~unique(.x$data[[1]]$n_schools[[1]])),
            plots = pmap(list(district, data, n_schools), 
                       ~ggplot(..3, aes(n, year_range)) +
