@@ -201,7 +201,7 @@ model_list_object |>
   filter(district %in% dists)
 ```
 
-# still need to add colors and note at bottom and change titles for each graph
+# still need to add note at bottom
 ```{r}
 cleaner_data <- clean_data  %>%  #filtering my df :)
   filter(district %in% dists)
@@ -209,17 +209,26 @@ cleaner_data <- clean_data  %>%  #filtering my df :)
 plots <- cleaner_data %>% 
   group_by(district) %>% 
   nest() %>% 
-  mutate(plot = map(data, ~.x %>% 
-              ggplot(aes(x = academic_year, y = option1)) +
-              geom_errorbar(aes(ymin = option1 - option1_se, ymax = option1 + option1_se))+
-              geom_point(aes(x = academic_year, y = option1))+
-              geom_line(color = "pink")+
-                  labs(title = "Achievement Gap Estimates: ",
-                       subtitle = paste("Negative values indicate White Students have higher average achievement","Positive values indicate Hispanic/Latino students have higher achievement", sep = "\n"),
-                       x = "School Year",
-                       y = "Average achievement differences (SD units)")))
+  mutate(plot = map2(
+    .x = data,
+    .y = district,
+    ~ ggplot(.x, aes(x = academic_year, y = option1)) +
+        geom_errorbar(aes(ymin = option1 - option1_se,
+                          ymax = option1 + option1_se)) +
+        geom_point() +
+        geom_line(aes(group = 1), color = "hotpink", linewidth = .6) +
+        geom_hline(yintercept = 0, color = "orange", linewidth = 1)+
+        labs(
+          title = paste("Achievement Gap Estimates:", .y),
+          subtitle = paste(
+            "Negative values indicate White students have higher average achievement",
+            "Positive values indicate Hispanic/Latino students have higher achievement",sep = "\n"),
+          x = "School Year",
+          y = "Average achievement differences (SD units)",
+          caption = paste("District includes (.x$n_schools) schools"))+
+  theme_minimal()))
 
-plots$plot[[2]]
+plots$plot[[7]]
 ```
 
 ## B4. (10 points)
