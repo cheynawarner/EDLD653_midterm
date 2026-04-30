@@ -234,7 +234,6 @@ plots <- school_data %>%
 plots$plot[[7]]
 ```
 
-
 # WHAT I TIRED THAT DIDNT WORK 
 # still need to add note at bottom
 ```{r}
@@ -265,25 +264,26 @@ plots2$plot[[7]]
 
 ### Achievement difference estimates for one school district across years (Version 2)
 ```{r}
-plots2 <- cleaner_data %>% 
+version2_plots <- cleaner_data %>% 
   ungroup() %>% 
-  nest_by(SOMETHING, SOMETHING ELSE) %>% 
-  mutate(n_schools = map_int(data, ~unique(.x$data[[1]]$n_schools[[1]])),
-           plots = pmap(list(district, data, n_schools), 
-                      ~ggplot(..3, aes(n, year_range)) +
-                        geom_col(aes(fill = n)) +
-                        scale_x_continuous(
-                          limits = c(0, max(pulitzer$n)),
-                          expand = c(0, 0)
-                        ) +
-                        guides(fill = "none") +
-                        labs(
-                          title = glue("Pulitzer Prize winners: {..1}"),
-                          x = "Total number of winners",
-                          y = "",
-                          caption = glue("District includes {}")))
+  nest_by(district, academic_year) %>% 
+    mutate(
+      plots = list(
+        ggplot(data, aes(x = academic_year, y = option1)) + 
+          geom_errorbar(aes(ymin = option1 - option1_se,
+                          ymax = option1 + option1_se))+
+        geom_point()+
+        geom_line(aes(group = 1), color = "hotpink", linewidth = .6)+
+        geom_hline(yintercept = 0, color = "orange", linewidth = 1)+
+        labs(
+            title = glue("Pulitzer Prize winners: {district}"),
+            x = "Total number of winners",
+            y = ""
+        )
+      )
+)
 
-plots2$plot[[7]]
+version2_plots$plot[[7]]
 ```
 
 ## B4. (10 points)
