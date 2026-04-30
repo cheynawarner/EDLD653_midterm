@@ -260,5 +260,30 @@ Save the plots into a “plots” directory. Make sure the file names are meanin
 **HINTS:** You don’t have to use a loop to create the file names (maybe give {glue} a try? Otherwise paste or paste0 will work fine). When working with the code, limit the number of plots you’re saving to, say, the first five to make sure it works before running it on all plots.
 
 ```{r}
+fs::dir_create(here::here("plots", "schools"))
 
+files <- str_replace_all(
+  tolower(plots$district),
+  " ",
+  "-"
+)
+paths <- here::here("plots", "schools", glue("{files}.png"))
+paths
+
+plots %>% 
+  ungroup() %>% 
+  mutate(path = paths) %>% 
+  select(plots, path)
+
+final_plots %>% 
+  ungroup() %>%  
+  mutate(path = paths) %>% 
+  rowwise() %>%  
+  summarize(
+    ggsave(path, plots, 
+      width = 9.5, 
+      height = 6.5,
+      dpi = 500
+    )
+  )
 ```
