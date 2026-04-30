@@ -197,15 +197,16 @@ The plot below shows the achievement difference estimates for one school distric
 ```{r}
 dists <- unique(clean_data$district)[1:100]
 
-model_list_object |> 
+#model_list_object |> 
+#  filter(district %in% dists)
+
+cleaner_data <- clean_data  %>%  #filtering my df :)
   filter(district %in% dists)
 ```
+### Achievement difference estimates for one school district across years (Version 1)
 
 # still need to add note at bottom
 ```{r}
-cleaner_data <- clean_data  %>%  #filtering my df :)
-  filter(district %in% dists)
-
 plots <- cleaner_data %>% 
   group_by(district) %>% 
   nest() %>% 
@@ -214,9 +215,9 @@ plots <- cleaner_data %>%
     .y = district,
     ~ ggplot(.x, aes(x = academic_year, y = option1)) +
         geom_errorbar(aes(ymin = option1 - option1_se,
-                          ymax = option1 + option1_se)) +
-        geom_point() +
-        geom_line(aes(group = 1), color = "hotpink", linewidth = .6) +
+                          ymax = option1 + option1_se))+
+        geom_point()+
+        geom_line(aes(group = 1), color = "hotpink", linewidth = .6)+
         geom_hline(yintercept = 0, color = "orange", linewidth = 1)+
         labs(
           title = paste("Achievement Gap Estimates:", .y),
@@ -230,6 +231,27 @@ plots <- cleaner_data %>%
 
 plots$plot[[7]]
 ```
+
+### Achievement difference estimates for one school district across years (Version 2)
+```{r}
+plots2 <- cleaner_data %>% 
+  mutate(plots = pmap(list(district, data), 
+                      ~ggplot(..3, aes(n, year_range)) +
+                        geom_col(aes(fill = n)) +
+                        scale_x_continuous(
+                          limits = c(0, max(pulitzer$n)),
+                          expand = c(0, 0)
+                        ) +
+                        guides(fill = "none") +
+                        labs(
+                          title = glue("Pulitzer Prize winners: {..1}"),
+                          x = "Total number of winners",
+                          y = "",
+                          caption = ..2)))
+
+plots2$plot[[7]]
+```
+
 
 ## B4. (10 points)
 
