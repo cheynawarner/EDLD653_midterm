@@ -207,12 +207,16 @@ cleaner_data <- clean_data  %>%  #filtering my df :)
 
 # still need to add note at bottom
 ```{r}
-plots <- cleaner_data %>% 
+school_data <- cleaner_data %>% 
+  unnest(data) %>% # get data out of its evil form
+  select(c(n_school, district, academic_year, option1, option1_se))
+
+plots <- school_data %>% 
   group_by(district) %>% 
   nest() %>% 
   mutate(
-    n_schools = pmap(data, ~unique(.x$data[[1]]$n_schools[[1]])),
-    plot = pmap(list(data, district, n_schools) %>% 
+    n_schools = pmap(data,
+    plot = map2(list(data, district) %>% 
         ggplot(aes(x = academic_year, y = option1)) +
         geom_errorbar(aes(ymin = option1 - option1_se, ymax = option1 + option1_se))+
         geom_point()+
@@ -225,10 +229,10 @@ plots <- cleaner_data %>%
             "Positive values indicate Hispanic/Latino students have higher achievement",sep = "\n"),
           x = "School Year",
           y = "Average achievement differences (SD units)",
-          caption = glue("District includes {.z} schools"))+
+          caption = glue("District includes {n_school} schools"))+
   theme_minimal()
-  )
-  )
+  )))
+
 
 plots$plot[[7]]
 ```
