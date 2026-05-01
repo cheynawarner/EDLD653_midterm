@@ -147,7 +147,8 @@ Note, on my computer these took about 1 minute per analysis. It will likely take
 effect_sizes_nested_option1 <- summary_stats %>% #new df
   group_by(district, academic_year) %>% # every school district in the state for each academic year
   nest() %>% 
-  mutate(effect_size_1 = map(data, ~ estimate_v(.x, "white", "hispanic_latino"))) 
+  mutate(effect_size_1 = 
+           map(data, ~ estimate_v(.x, "white", "hispanic_latino"))) 
 ```
 
 # using nest_by() \|\> summarize().
@@ -207,50 +208,33 @@ cleaner_data <- clean_data  %>%  #filtering my df :)
 
 # still need to add note at bottom
 ```{r}
-school_data <- cleaner_data %>% 
-  unnest(data) %>% # get data out of its evil form
-  select(c(n_school, district, academic_year, option1, option1_se))
+# school_data <- cleaner_data %>% 
+#   unnest(data) %>% # get data out of its evil form
+#   select(c(n_school, district, academic_year, option1, option1_se))
 
 plots <- cleaner_data %>% 
   group_by(district) %>% 
   nest() %>%   
-  mutate(plots = pmap(list(district, academic_year, data), ~rnorm(..1, ..2, ..3))
-        ~ggplot(..3, aes(x = academic_year, y = option1)) +
+  mutate(n_school = map_int(data, ~unique(.x$data[[1]]$n_school[[1]])),
+        plot = pmap(list(data, district, n_school), \(.x, .y, .z) .x %>% 
+        ggplot(aes(x = academic_year, y = option1, group = 1)) +
         geom_errorbar(aes(ymin = option1 - option1_se, ymax = option1 + option1_se))+
         geom_point()+
-        geom_line(aes(group = 1), color = "hotpink", linewidth = .6)+
+        geom_line(color = "hotpink")+
         geom_hline(yintercept = 0, color = "orange", linewidth = 1)+
         labs(
-          title = paste("Achievement Gap Estimates:", .y),
+          title = glue("Achievement Gap Estimates: {.y}"),
           subtitle = paste(
             "Negative values indicate <span style='color:#d35cff'>White</span> students have higher average achievement",
             "Positive values indicate <span style='color:#d35cff'>Hispanic/Latino</span> students have higher achievement",sep = "\n"),
           x = "School Year",
           y = "Average achievement differences (SD units)",
-          caption = glue("District includes {n_schools} schools"))+
-  theme_minimal()
-  )
-
-plots$plot[[7]]
-
-
-final_plots <- cleaner_data |>
-  group_by(district, academic_year) %>% 
-  nest() %>%  
-  mutate(plots = pmap(list(district, academic_year, data), 
-    ~ggplot(aes(..3, option1, academic_year)) +
-      geom_col() +
-      guides(fill = "none") +
-      labs(
-        title = glue("Pulitzer Prize winners: {..1}"),
-        x = "Total number of winners",
-        y = "",
-        caption = ..2 
-      )
-  )
+          caption = glue("Note: District includes {.z} schools."))+
+        theme_minimal()
+)
 )
 
-
+plots$plot[[7]]
 ```
 
 # WHAT I TIRED THAT DIDNT WORK 
