@@ -218,11 +218,7 @@ plots <- cleaner_data %>%
   mutate(n_school = map_int(data, ~unique(.x$data[[1]]$n_school[[1]])),
         plot = pmap(list(data, district, n_school), \(.x, .y, .z) .x %>% 
         ggplot(aes(x = academic_year, y = option1, group = 1)) +
-<<<<<<< HEAD
         geom_errorbar(aes(ymin = option1 - option1_se, ymax = option1 + option1_se), width = .4)+
-=======
-        geom_errorbar(aes(ymin = option1 - option1_se, ymax = option1 + option1_se))+
->>>>>>> origin/main
         geom_point()+
         geom_line(color = "hotpink")+
         geom_hline(yintercept = 0, color = "orange", linewidth = 1)+
@@ -239,37 +235,6 @@ plots <- cleaner_data %>%
 )
 
 plots$plot[[7]]
-<<<<<<< HEAD
-=======
-```
-
-# WHAT I TIRED THAT DIDNT WORK 
-# still need to add note at bottom
-```{r}
-plots2 <- cleaner_data %>% 
-  group_by(district) %>% 
-  nest() %>% 
-  mutate(plot = map2(
-    .x = data,
-    .y = district,
-    ~ ggplot(.x, aes(x = academic_year, y = option1)) +
-        geom_errorbar(aes(ymin = option1 - option1_se,
-                          ymax = option1 + option1_se))+
-        geom_point()+
-        geom_line(aes(group = 1), color = "hotpink", linewidth = .6)+
-        geom_hline(yintercept = 0, color = "orange", linewidth = 1)+
-        labs(
-          title = paste("Achievement Gap Estimates:", .y),
-          subtitle = paste(
-            "Negative values indicate <span style='color:#d35cff'>White</span> students have higher average achievement",
-            "Positive values indicate <span style='color:#d35cff'>Hispanic/Latino</span> students have higher achievement",sep = "\n"),
-          x = "School Year",
-          y = "Average achievement differences (SD units)",
-          caption = paste("District includes (.x$n_schools) schools"))+
-  theme_minimal()))
-
-plots2$plot[[7]]
->>>>>>> origin/main
 ```
 
 ### Achievement difference estimates for one school district across years (Version 2)
