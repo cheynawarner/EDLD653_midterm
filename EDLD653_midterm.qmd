@@ -16,6 +16,7 @@ library(tidyverse)
 library(purrr)
 library(janitor)
 library(glue)
+library(ggtext)
 ```
 
 # Midterm Test
@@ -208,10 +209,6 @@ cleaner_data <- clean_data  %>%  #filtering my df :)
 ### Achievement difference estimates for one school district across years (Version 1)
 
 ```{r}
-# school_data <- cleaner_data %>% 
-#   unnest(data) %>% # get data out of its evil form
-#   select(c(n_school, district, academic_year, option1, option1_se))
-
 plots <- cleaner_data %>% 
   group_by(district) %>% 
   nest() %>%   
@@ -225,12 +222,13 @@ plots <- cleaner_data %>%
         labs(
           title = glue("Achievement Gap Estimates: {.y}"),
           subtitle = paste(
-            "Negative values indicate <span style='color:#d35cff'>White</span> students have higher average achievement",
-            "Positive values indicate <span style='color:#d35cff'>Hispanic/Latino</span> students have higher achievement",sep = "\n"),
+            "Negative values indicate <span style='color:#679c0c'>White</span> students have higher average achievement",
+            "Positive values indicate <span style='color:#679c0c'>Hispanic/Latino</span> students have higher achievement",sep = "\n"),
           x = "School Year",
           y = "Average achievement differences (SD units)",
           caption = glue("Note: District includes {.z} schools."))+
-        theme_minimal()
+        theme_minimal()+
+        theme(plot.subtitle = element_markdown())
 )
 )
 
@@ -239,6 +237,10 @@ plots$plot[[7]]
 
 ### Achievement difference estimates for one school district across years (Version 2)
 ```{r}
+# school_data <- cleaner_data %>% 
+#   unnest(data) %>% # get data out of its evil form
+#   select(c(n_school, district, academic_year, option1, option1_se))
+
 version2_plots <- cleaner_data %>% 
   ungroup() %>% 
   nest_by(district) %>% 
@@ -253,12 +255,13 @@ version2_plots <- cleaner_data %>%
           labs(
           title = glue("Achievement Gap Estimates: {district} "),
           subtitle = paste(
-            "Negative values indicate <span style='color:#d35cff'>White</span> students have higher average achievement",
-            "Positive values indicate <span style='color:#d35cff'>Hispanic/Latino</span> students have higher achievement",sep = "\n"),
+            "Negative values indicate <span style='color:#679c0c'>White</span> students have higher average achievement",
+            "Positive values indicate <span style='color:#679c0c'>Hispanic/Latino</span> students have higher achievement",sep ="\n"),
           x = "School Year",
           y = "Average achievement differences (SD units)",
-          caption = glue(" District includes {data$data$n_school} schools "))+
-  theme_minimal()))
+          caption = glue("District includes {data$n_school} schools"))+
+  theme_minimal()+
+  theme(plot.subtitle = element_markdown())))
 
 version2_plots$plots[[7]]
 ```
